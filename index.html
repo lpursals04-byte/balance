@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Balanç</title>
+<meta name="theme-color" content="#F2F4F6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1318" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Balanç">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{
+  --bg:#F2F4F6; --surface:#FFFFFF; --sunk:#E8ECF0; --ink:#141A22; --muted:#5A6573; --line:#D6DCE3;
+  --accent:#2F54C8; --accent-ink:#FFFFFF; --in:#1C8456; --in-soft:#DDF1E6; --out:#C0392F; --out-soft:#F8E1DE;
+  --display:ui-rounded,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"Roboto Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark; --bg:#0F1318; --surface:#171D24; --sunk:#1F262F; --ink:#E7ECF2; --muted:#94A0AE; --line:#2A333E;
+  --accent:#7D9BFF; --accent-ink:#0F1318; --in:#4CC78B; --in-soft:#15321F; --out:#F07368; --out-soft:#3A1A18;}}
+:root[data-theme="dark"]{
+  color-scheme:dark; --bg:#0F1318; --surface:#171D24; --sunk:#1F262F; --ink:#E7ECF2; --muted:#94A0AE; --line:#2A333E;
+  --accent:#7D9BFF; --accent-ink:#0F1318; --in:#4CC78B; --in-soft:#15321F; --out:#F07368; --out-soft:#3A1A18;}
+html{color-scheme:light;-webkit-text-size-adjust:100%}
+*{-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+[hidden]{display:none!important}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 48px;display:grid;gap:20px}
+h1,h2{font-family:var(--display);margin:0;text-wrap:balance}
+h1{font-size:28px;font-weight:700;letter-spacing:-.01em}
+h2{font-size:17px;font-weight:700}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.label{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
+.sub{color:var(--muted);font-size:13.5px;margin-top:2px}
+.monthnav{display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px}
+.monthnav button{border:0;background:transparent;width:34px;height:34px;border-radius:7px;font-size:18px}
+.monthnav button:hover{background:var(--sunk)}
+.monthnav .m{min-width:150px;text-align:center;font-weight:600;text-transform:capitalize}
+
+.banner{background:var(--sunk);border-radius:10px;padding:10px 14px;font-size:13.5px;color:var(--muted)}
+.banner b{color:var(--ink)}
+
+.summary{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.summary>div{background:var(--surface);padding:16px 18px;display:grid;gap:4px}
+.big{font-size:32px;font-weight:500;letter-spacing:-.02em}
+.mid{font-size:22px;font-weight:500}
+.pos{color:var(--in)} .neg{color:var(--out)}
+.hint{font-size:12.5px;color:var(--muted)}
+@media (max-width:620px){.summary{grid-template-columns:1fr 1fr}.summary>div:first-child{grid-column:1/-1}}
+
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:20px;align-items:start}
+@media (max-width:800px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:14px}
+
+form{display:grid;gap:12px}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--sunk);border-radius:9px;padding:3px}
+.seg button{border:0;background:transparent;padding:8px;border-radius:7px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"].o{background:var(--surface);color:var(--out);box-shadow:0 1px 2px rgb(0 0 0/.08)}
+.seg button[aria-pressed="true"].i{background:var(--surface);color:var(--in);box-shadow:0 1px 2px rgb(0 0 0/.08)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field{display:grid;gap:4px}
+.field label{font-size:12.5px;color:var(--muted);font-weight:500}
+input,select{font-size:16px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;box-sizing:border-box;min-width:0}
+input:focus,select:focus{border-color:var(--accent);outline:none}
+.amount{font-family:var(--mono);font-size:20px!important}
+.check{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted)}
+.check input{width:auto}
+.primary{background:var(--accent);color:var(--accent-ink);border:0;border-radius:9px;padding:11px;font-weight:600}
+.primary:disabled{opacity:.5;cursor:default}
+.ghost{background:transparent;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--muted)}
+.ghost:hover{color:var(--ink);border-color:var(--muted)}
+.err{color:var(--out);font-size:13px;min-height:1em}
+
+.cats{display:grid;gap:9px}
+.cat{display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-size:13.5px}
+.cat .bar{grid-column:1/-1;height:6px;background:var(--sunk);border-radius:3px;overflow:hidden}
+.cat .bar i{display:block;height:100%;background:var(--out);border-radius:3px}
+.empty{color:var(--muted);font-size:13.5px}
+
+.listhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.filters{display:flex;gap:4px}
+.filters button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:4px 11px;font-size:12.5px;color:var(--muted)}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+ul.moves{list-style:none;margin:0;padding:0;display:grid}
+.moves li{display:grid;grid-template-columns:44px minmax(0,1fr) auto 32px;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.moves li:first-child{border-top:0}
+.day{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:center;line-height:1.15}
+.day b{display:block;font-size:17px;color:var(--ink);font-weight:500}
+.what{min-width:0}
+.what .c{font-weight:600;font-size:14px}
+.what .d{color:var(--muted);font-size:13px;overflow-wrap:anywhere}
+.tag{display:inline-block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;padding:1px 6px;border-radius:4px;background:var(--sunk);color:var(--muted);margin-left:6px;vertical-align:1px}
+.amt{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:500;white-space:nowrap}
+.del{border:0;background:transparent;color:var(--muted);width:32px;height:32px;border-radius:6px;font-size:16px}
+.del:hover{background:var(--out-soft);color:var(--out)}
+.del.confirm{width:auto;padding:0 8px;background:var(--out);color:#fff;font-size:12px;font-weight:600}
+.moves li.confirming{grid-template-columns:44px minmax(0,1fr) auto auto}
+
+.chart{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;align-items:end;height:150px;position:relative;padding-top:6px}
+.chart .zero{position:absolute;left:0;right:0;border-top:1px dashed var(--line)}
+.col{padding:0;display:flex;flex-direction:column;height:100%;justify-content:center;position:relative;cursor:pointer;border-radius:4px}
+.col:hover{background:var(--sunk)}
+.col .b{position:absolute;left:18%;right:18%;border-radius:3px}
+.col.cur{outline:1.5px solid var(--accent);outline-offset:1px}
+.xl{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;font-size:11px;color:var(--muted);text-align:center;text-transform:capitalize}
+.status{font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.col .b,.cat .bar i{transition:height .25s,width .25s,top .25s}}
+.backup{display:flex;flex-wrap:wrap;gap:8px}
+.backup .hint{flex-basis:100%}
+.ok{color:var(--in);font-size:13px;min-height:1em}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Balanç mensual</h1>
+      <div class="sub">Ingressos i despeses, mes a mes. <span class="status" id="status">Desat en aquest mòbil.</span></div>
+    </div>
+    <div class="monthnav" role="group" aria-label="Mes">
+      <button id="prev" aria-label="Mes anterior">‹</button>
+      <div class="m" id="monthLabel"></div>
+      <button id="next" aria-label="Mes següent">›</button>
+    </div>
+  </header>
+
+  <div class="banner" id="demo" hidden><b>Dades d'exemple.</b> Així es veurà quan tinguis moviments. Desapareixen tan bon punt afegeixis el primer.</div>
+
+  <section class="summary" aria-label="Resum del mes">
+    <div><span class="label">Balanç del mes</span><span class="big num" id="sBal"></span><span class="hint" id="sRate"></span></div>
+    <div><span class="label">Ingressos</span><span class="mid num pos" id="sIn"></span><span class="hint" id="sInN"></span></div>
+    <div><span class="label">Despeses</span><span class="mid num neg" id="sOut"></span><span class="hint" id="sOutN"></span></div>
+  </section>
+
+  <div class="grid">
+    <div style="display:grid;gap:20px">
+      <section class="panel" aria-labelledby="addH">
+        <h2 id="addH">Nou moviment</h2>
+        <form id="form" novalidate>
+          <div class="seg" role="group" aria-label="Tipus">
+            <button type="button" class="o" id="tOut" aria-pressed="true">Despesa</button>
+            <button type="button" class="i" id="tIn" aria-pressed="false">Ingrés</button>
+          </div>
+          <div class="field"><label for="fAmt">Import (€)</label><input id="fAmt" class="amount" inputmode="decimal" placeholder="0,00" autocomplete="off"></div>
+          <div class="row">
+            <div class="field"><label for="fCat">Categoria</label><select id="fCat"></select></div>
+            <div class="field"><label for="fDate">Data</label><input id="fDate" type="date"></div>
+          </div>
+          <div class="field"><label for="fDesc">Concepte</label><input id="fDesc" placeholder="p. ex. Compra Mercadona" maxlength="80" autocomplete="off"></div>
+          <label class="check"><input type="checkbox" id="fFix"> Es repeteix cada mes (fix)</label>
+          <button class="primary" id="save" type="submit">Afegeix</button>
+          <div class="err" id="err" role="status"></div>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="catH">
+        <h2 id="catH">On se'n van els diners</h2>
+        <div class="cats" id="cats"></div>
+      </section>
+    </div>
+
+    <div style="display:grid;gap:20px">
+      <section class="panel" aria-labelledby="listH">
+        <div class="listhead">
+          <h2 id="listH">Moviments</h2>
+          <div class="filters" role="group" aria-label="Filtre">
+            <button data-f="all" aria-pressed="true">Tots</button>
+            <button data-f="out" aria-pressed="false">Despeses</button>
+            <button data-f="in" aria-pressed="false">Ingressos</button>
+          </div>
+        </div>
+        <ul class="moves" id="moves"></ul>
+        <div><button class="ghost" id="copyFix" hidden></button></div>
+      </section>
+
+      <section class="panel" aria-labelledby="yearH">
+        <div class="listhead"><h2 id="yearH">Últims 12 mesos</h2><span class="hint" id="yearTot"></span></div>
+        <div class="chart" id="chart"><div class="zero" id="zero"></div></div>
+        <div class="xl" id="xl"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="bkH">
+        <h2 id="bkH">Còpia de seguretat</h2>
+        <div class="backup">
+          <p class="hint" style="margin:0">Les dades només són en aquest mòbil. Si esborres l'app o les dades del navegador, es perden. Descarrega una còpia de tant en tant.</p>
+          <button class="ghost" id="exp" type="button">Descarrega còpia</button>
+          <button class="ghost" id="impBtn" type="button">Restaura una còpia</button>
+          <input type="file" id="imp" accept="application/json,.json" hidden>
+          <button class="ghost" id="impOk" type="button" hidden style="background:var(--out);color:#fff;border-color:var(--out)"></button>
+        </div>
+        <div class="ok" id="bkMsg" role="status"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+const CATS = {
+  out: ["Habitatge","Menjar","Transport","Oci","Universitat","Roba","Salut","Subscripcions","Regals","Altres"],
+  in:  ["Feina","Beca","Ajuda familiar","Venda","Altres"]
+};
+const eur = new Intl.NumberFormat("ca-ES",{style:"currency",currency:"EUR"});
+const monthFmt = new Intl.DateTimeFormat("ca-ES",{month:"long",year:"numeric"});
+const shortM = new Intl.DateTimeFormat("ca-ES",{month:"short"});
+const $ = id => document.getElementById(id);
+
+const pad = n => String(n).padStart(2,"0");
+const keyOf = d => d.getFullYear()+"-"+pad(d.getMonth()+1);
+const today = new Date();
+let cur = new Date(today.getFullYear(), today.getMonth(), 1);
+let type = "out", filter = "all", confirmId = null;
+let months = {};          // key -> items[]
+let demo = false;
+
+/* ---------- example data (shown only while there is nothing stored) ---------- */
+function exampleData(){
+  const m = {}; const base = new Date(today.getFullYear(), today.getMonth(), 1);
+  const sample = [
+    ["in",650,"Feina","Classes de repàs",5,true],["in",120,"Ajuda familiar","",1,true],
+    ["out",180,"Habitatge","Aportació a casa",1,true],["out",62.4,"Menjar","Setmana",8,false],
+    ["out",38.9,"Menjar","Súper",19,false],["out",45,"Transport","Gasolina",12,false],
+    ["out",24.5,"Oci","Sopar",14,false],["out",11.99,"Subscripcions","Spotify",3,true],["out",32,"Universitat","Apunts",10,false]
+  ];
+  for(let k=0;k<6;k++){
+    const d = new Date(base.getFullYear(), base.getMonth()-k, 1), key = keyOf(d);
+    m[key] = sample.map((s,i)=>({id:"ex"+k+"_"+i,t:s[0],a:+(s[1]*(s[5]?1:(0.7+((i*7+k*3)%6)/10))).toFixed(2),c:s[2],d:s[3],day:s[4],fix:s[5]}));
+  }
+  return m;
+}
+
+/* ---------- storage (només en aquest dispositiu) ---------- */
+const KEY = "balanc-v1";
+function localLoad(){ try{ const v = JSON.parse(localStorage.getItem(KEY)||"{}"); return v && typeof v==="object" ? v : {}; }catch(e){ return {}; } }
+async function persist(){
+  try{ localStorage.setItem(KEY, JSON.stringify(months)); }
+  catch(e){ $("err").textContent = "No s'ha pogut desar al mòbil. Comprova que hi hagi espai lliure."; throw e; }
+}
+function init(){
+  months = localLoad(); refreshDemo(); render();
+  if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+  if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+function refreshDemo(){ demo = Object.values(months).every(a=>!a || !a.length); }
+const data = () => demo ? exampleData() : months;
+
+/* ---------- render ---------- */
+function totals(items){
+  let i=0,o=0; for(const x of items||[]) x.t==="in" ? i+=x.a : o+=x.a;
+  return {i,o,b:i-o};
+}
+function signed(n){ return (n>0?"+":n<0?"−":"") + eur.format(Math.abs(n)); }
+
+function render(){
+  const D = data(), key = keyOf(cur), items = (D[key]||[]).slice().sort((a,b)=>b.day-a.day || (a.t==="in"?-1:1));
+  $("demo").hidden = !demo;
+  $("monthLabel").textContent = monthFmt.format(cur);
+  $("next").disabled = false;
+
+  const t = totals(items);
+  $("sBal").textContent = signed(t.b);
+  $("sBal").className = "big num " + (t.b>0?"pos":t.b<0?"neg":"");
+  $("sIn").textContent = eur.format(t.i);
+  $("sOut").textContent = eur.format(t.o);
+  const nIn = items.filter(x=>x.t==="in").length, nOut = items.length-nIn;
+  $("sInN").textContent = nIn + (nIn===1?" moviment":" moviments");
+  $("sOutN").textContent = nOut + (nOut===1?" moviment":" moviments");
+  $("sRate").textContent = t.i>0 ? "Estalvies el " + Math.round(t.b/t.i*100) + " % del que ingresses" : (items.length? "Aquest mes no hi ha ingressos" : "Encara no hi ha res aquest mes");
+
+  // categories
+  const byCat = {}; items.filter(x=>x.t==="out").forEach(x=>byCat[x.c]=(byCat[x.c]||0)+x.a);
+  const cats = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const max = cats.length ? cats[0][1] : 1;
+  $("cats").innerHTML = cats.length ? cats.map(([c,v])=>
+    `<div class="cat"><span>${esc(c)}</span><span class="num">${eur.format(v)} <span class="hint">${Math.round(v/t.o*100)} %</span></span><div class="bar"><i style="width:${(v/max*100).toFixed(1)}%"></i></div></div>`
+  ).join("") : `<p class="empty" style="margin:0">Cap despesa aquest mes.</p>`;
+
+  // list
+  const shown = items.filter(x=>filter==="all"||x.t===filter);
+  $("moves").innerHTML = shown.length ? shown.map(x=>{
+    const conf = confirmId===x.id;
+    return `<li class="${conf?"confirming":""}"><div class="day"><b>${pad(x.day)}</b>${esc(shortM.format(cur))}</div>
+      <div class="what"><div class="c">${esc(x.c)}${x.fix?'<span class="tag">fix</span>':""}</div>${x.d?`<div class="d">${esc(x.d)}</div>`:""}</div>
+      <div class="amt ${x.t==="in"?"pos":"neg"}">${x.t==="in"?"+":"−"}${eur.format(x.a)}</div>
+      ${demo?"<span></span>":`<button class="del ${conf?"confirm":""}" data-id="${x.id}" aria-label="${conf?"Confirma esborrar":"Esborra"}">${conf?"Esborra":"×"}</button>`}</li>`;
+  }).join("") : `<li><p class="empty" style="margin:0;grid-column:1/-1">No hi ha moviments${filter==="all"?"":" d'aquest tipus"} aquest mes.</p></li>`;
+
+  // copy fixed from previous month
+  const prevKey = keyOf(new Date(cur.getFullYear(), cur.getMonth()-1, 1));
+  const prevFix = (D[prevKey]||[]).filter(x=>x.fix);
+  const missing = prevFix.filter(p=>!items.some(x=>x.fix && x.c===p.c && x.d===p.d && x.t===p.t));
+  $("copyFix").hidden = demo || !missing.length;
+  $("copyFix").textContent = `Copia ${missing.length} ${missing.length===1?"moviment fix":"moviments fixos"} del mes anterior`;
+
+  // year chart
+  const keys = []; for(let k=11;k>=0;k--) keys.push(new Date(cur.getFullYear(), cur.getMonth()-k, 1));
+  const bals = keys.map(d=>totals(D[keyOf(d)]).b);
+  const hi = Math.max(0,...bals), lo = Math.min(0,...bals), span = (hi-lo)||1;
+  const zeroTop = hi/span*100;
+  $("zero").style.top = (6 + (150-6)*hi/span) + "px";
+  $("chart").querySelectorAll(".col").forEach(n=>n.remove());
+  keys.forEach((d,i)=>{
+    const b = bals[i], col = document.createElement("button");
+    col.className = "col" + (i===11?" cur":""); col.style.border="0"; col.style.background="";
+    col.setAttribute("aria-label", monthFmt.format(d)+": "+signed(b)); col.title = monthFmt.format(d)+" · "+signed(b);
+    const bar = document.createElement("span"); bar.className="b";
+    const h = Math.abs(b)/span*100;
+    bar.style.height = Math.max(b?2:0, h) + "%";
+    bar.style.top = (b>=0 ? (zeroTop - h) : zeroTop) + "%";
+    bar.style.background = b>=0 ? "var(--in)" : "var(--out)";
+    col.appendChild(bar);
+    col.onclick = ()=>{ cur = d; confirmId=null; render(); };
+    $("chart").appendChild(col);
+  });
+  $("xl").innerHTML = keys.map(d=>`<span>${esc(shortM.format(d).replace(".",""))}</span>`).join("");
+  const yt = bals.reduce((s,v)=>s+v,0);
+  $("yearTot").innerHTML = `Acumulat: <span class="num ${yt>=0?"pos":"neg"}">${signed(yt)}</span>`;
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+/* ---------- form ---------- */
+function setType(t){
+  type = t; $("tOut").setAttribute("aria-pressed", t==="out"); $("tIn").setAttribute("aria-pressed", t==="in");
+  $("fCat").innerHTML = CATS[t].map(c=>`<option>${c}</option>`).join("");
+}
+function defaultDate(){
+  const sameMonth = cur.getFullYear()===today.getFullYear() && cur.getMonth()===today.getMonth();
+  const d = sameMonth ? today : cur;
+  $("fDate").value = d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+}
+$("tOut").onclick = ()=>setType("out");
+$("tIn").onclick = ()=>setType("in");
+
+$("form").addEventListener("submit", async e=>{
+  e.preventDefault(); $("err").textContent = "";
+  const a = parseFloat($("fAmt").value.replace(/\./g,"").replace(",",".").replace(/[^\d.]/g,""));
+  if(!(a>0)){ $("err").textContent = "Escriu un import més gran que zero."; $("fAmt").focus(); return; }
+  const ds = $("fDate").value; if(!ds){ $("err").textContent = "Tria una data."; return; }
+  const [y,m,dd] = ds.split("-").map(Number);
+  const key = y+"-"+pad(m);
+  const item = {id: Date.now().toString(36)+Math.random().toString(36).slice(2,6), t:type, a:Math.round(a*100)/100, c:$("fCat").value, d:$("fDesc").value.trim(), day:dd, fix:$("fFix").checked};
+  if(demo){ months = {}; demo = false; }
+  months[key] = (months[key]||[]).concat(item);
+  cur = new Date(y, m-1, 1);
+  $("save").disabled = true; render();
+  try{ await persist(key); $("fAmt").value=""; $("fDesc").value=""; $("fFix").checked=false; $("fAmt").focus(); }
+  catch(_){ months[key] = months[key].filter(x=>x.id!==item.id); refreshDemo(); render(); }
+  $("save").disabled = false;
+});
+
+$("moves").addEventListener("click", async e=>{
+  const b = e.target.closest(".del"); if(!b) return;
+  const id = b.dataset.id;
+  if(confirmId !== id){ confirmId = id; render(); setTimeout(()=>{ if(confirmId===id){ confirmId=null; render(); } }, 4000); return; }
+  confirmId = null;
+  const key = keyOf(cur), before = months[key];
+  months[key] = (months[key]||[]).filter(x=>x.id!==id); refreshDemo(); render();
+  try{ await persist(key); }catch(_){ months[key] = before; refreshDemo(); render(); }
+});
+
+$("copyFix").onclick = async ()=>{
+  const key = keyOf(cur), prevKey = keyOf(new Date(cur.getFullYear(), cur.getMonth()-1, 1));
+  const items = months[key]||[];
+  const add = (months[prevKey]||[]).filter(x=>x.fix && !items.some(y=>y.fix&&y.c===x.c&&y.d===x.d&&y.t===x.t))
+    .map(x=>({...x, id: Date.now().toString(36)+Math.random().toString(36).slice(2,6)}));
+  const lastDay = new Date(cur.getFullYear(), cur.getMonth()+1, 0).getDate();
+  add.forEach(x=>x.day=Math.min(x.day,lastDay));
+  months[key] = items.concat(add); render();
+  try{ await persist(key); }catch(_){ months[key] = items; render(); }
+};
+
+document.querySelectorAll(".filters button").forEach(b=>b.onclick=()=>{
+  filter = b.dataset.f; document.querySelectorAll(".filters button").forEach(x=>x.setAttribute("aria-pressed", x===b)); render();
+});
+$("prev").onclick = ()=>{ cur = new Date(cur.getFullYear(), cur.getMonth()-1, 1); confirmId=null; defaultDate(); render(); };
+$("next").onclick = ()=>{ cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1); confirmId=null; defaultDate(); render(); };
+
+/* ---------- còpia de seguretat ---------- */
+$("exp").onclick = async ()=>{
+  $("bkMsg").textContent = "";
+  const d = new Date(), name = `balanc-${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}.json`;
+  const blob = new Blob([JSON.stringify({app:"balanc",version:1,exported:d.toISOString(),months},null,1)],{type:"application/json"});
+  try{
+    const file = new File([blob], name, {type:"application/json"});
+    if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:name}); $("bkMsg").textContent = "Còpia preparada."; return; }
+  }catch(e){ if(e && e.name==="AbortError") return; }
+  const url = URL.createObjectURL(blob), a = document.createElement("a");
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  $("bkMsg").textContent = "Còpia descarregada.";
+};
+let pending = null;
+$("impBtn").onclick = ()=>{ $("imp").value=""; $("imp").click(); };
+$("imp").onchange = async ()=>{
+  const f = $("imp").files[0]; if(!f) return;
+  try{
+    const j = JSON.parse(await f.text());
+    const m = j && j.months;
+    if(!m || typeof m!=="object") throw 0;
+    const n = Object.values(m).reduce((s,a)=>s+(Array.isArray(a)?a.length:0),0);
+    pending = m;
+    $("impOk").textContent = `Substitueix les dades actuals per ${n} moviments`;
+    $("impOk").hidden = false;
+    $("bkMsg").textContent = "";
+  }catch(e){ $("bkMsg").textContent = ""; $("err").textContent = ""; $("bkMsg").innerHTML = '<span class="neg">Aquest fitxer no és una còpia de l\'app.</span>'; }
+};
+$("impOk").onclick = async ()=>{
+  if(!pending) return;
+  months = pending; pending = null; $("impOk").hidden = true;
+  refreshDemo(); await persist(); render();
+  $("bkMsg").textContent = "Còpia restaurada.";
+};
+
+setType("out"); defaultDate(); init();
+</script>
+</body>
+</html>
