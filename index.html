@@ -16,17 +16,17 @@
 <style>
 :root{
   --bg:#F2F4F6; --surface:#FFFFFF; --sunk:#E8ECF0; --ink:#141A22; --muted:#5A6573; --line:#D6DCE3;
-  --accent:#2F54C8; --accent-ink:#FFFFFF; --in:#1C8456; --in-soft:#DDF1E6; --out:#C0392F; --out-soft:#F8E1DE;
+  --accent:#2F54C8; --accent-ink:#FFFFFF; --in:#1C8456; --in-soft:#DDF1E6; --out:#C0392F; --out-soft:#F8E1DE; --warn:#A8690B;
   --display:ui-rounded,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --mono:ui-monospace,SFMono-Regular,"Roboto Mono",Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   color-scheme:dark; --bg:#0F1318; --surface:#171D24; --sunk:#1F262F; --ink:#E7ECF2; --muted:#94A0AE; --line:#2A333E;
-  --accent:#7D9BFF; --accent-ink:#0F1318; --in:#4CC78B; --in-soft:#15321F; --out:#F07368; --out-soft:#3A1A18;}}
+  --accent:#7D9BFF; --accent-ink:#0F1318; --in:#4CC78B; --in-soft:#15321F; --out:#F07368; --out-soft:#3A1A18; --warn:#E6A94A;}}
 :root[data-theme="dark"]{
   color-scheme:dark; --bg:#0F1318; --surface:#171D24; --sunk:#1F262F; --ink:#E7ECF2; --muted:#94A0AE; --line:#2A333E;
-  --accent:#7D9BFF; --accent-ink:#0F1318; --in:#4CC78B; --in-soft:#15321F; --out:#F07368; --out-soft:#3A1A18;}
+  --accent:#7D9BFF; --accent-ink:#0F1318; --in:#4CC78B; --in-soft:#15321F; --out:#F07368; --out-soft:#3A1A18; --warn:#E6A94A;}
 html{color-scheme:light;-webkit-text-size-adjust:100%}
 *{-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
@@ -116,6 +116,30 @@ ul.moves{list-style:none;margin:0;padding:0;display:grid}
 .xl{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;font-size:11px;color:var(--muted);text-align:center;text-transform:capitalize}
 .status{font-size:12px;color:var(--muted)}
 @media (prefers-reduced-motion:no-preference){.col .b,.cat .bar i{transition:height .25s,width .25s,top .25s}}
+.an-head{font-size:16px;line-height:1.5;margin:0;max-width:68ch}
+.an-head strong{font-family:var(--mono);font-weight:500;font-variant-numeric:tabular-nums}
+.insights{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.insights li{display:grid;grid-template-columns:4px minmax(0,1fr);gap:12px;font-size:14px}
+.insights li::before{content:"";border-radius:2px;background:var(--line)}
+.insights li.good::before{background:var(--in)}
+.insights li.warn::before{background:var(--warn)}
+.insights li.bad::before{background:var(--out)}
+.insights .t{font-weight:600;display:block}
+.insights .x{color:var(--muted)}
+.an-more{border-top:1px solid var(--line);padding-top:10px}
+.an-more summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--accent);list-style:none}
+.an-more summary::-webkit-details-marker{display:none}
+.an-more summary::after{content:" ▾"}
+.an-more[open] summary::after{content:" ▴"}
+.tbl{overflow-x:auto;margin-top:10px}
+.tbl table{border-collapse:collapse;width:100%;font-size:13.5px}
+.tbl th{text-align:left;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:6px 8px 6px 0;border-bottom:1px solid var(--line)}
+.tbl td{padding:7px 8px 7px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl td.r,.tbl th.r{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl .sub2{color:var(--muted);font-size:12px}
+.cat .bar{position:relative;overflow:visible!important}
+.cat .bar .avg{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.5;border-radius:1px}
+.cat .bar i{max-width:100%}
 .backup{display:flex;flex-wrap:wrap;gap:8px}
 .backup .hint{flex-basis:100%}
 .ok{color:var(--in);font-size:13px;min-height:1em}
@@ -144,6 +168,22 @@ ul.moves{list-style:none;margin:0;padding:0;display:grid}
     <div><span class="label">Despeses</span><span class="mid num neg" id="sOut"></span><span class="hint" id="sOutN"></span></div>
   </section>
 
+  <section class="panel" aria-labelledby="anH" id="anPanel">
+    <h2 id="anH">Anàlisi del mes</h2>
+    <p class="an-head" id="anHead"></p>
+    <ul class="insights" id="insights"></ul>
+    <details class="an-more" id="anMore">
+      <summary id="anSum">Anàlisi completa</summary>
+      <ul class="insights" id="insights2" style="margin:12px 0 4px"></ul>
+      <h3 class="label" style="margin:14px 0 0">Per conceptes</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Concepte</th><th class="r">Cops</th><th class="r">Total</th><th class="r">Mitjana/mes</th></tr></thead>
+        <tbody id="conceptRows"></tbody>
+      </table></div>
+      <p class="hint" style="margin:8px 0 0">Els conceptes semblants s'agrupen sols: «Mercadona» i «Compra Mercadona Caldes» compten com el mateix.</p>
+    </details>
+  </section>
+
   <div class="grid">
     <div style="display:grid;gap:20px">
       <section class="panel" aria-labelledby="addH">
@@ -167,6 +207,7 @@ ul.moves{list-style:none;margin:0;padding:0;display:grid}
 
       <section class="panel" aria-labelledby="catH">
         <h2 id="catH">On se'n van els diners</h2>
+        <p class="hint" style="margin:-6px 0 0" id="catHint" hidden>La marca vertical és la teva mitjana mensual en aquella categoria.</p>
         <div class="cats" id="cats"></div>
       </section>
     </div>
@@ -255,6 +296,220 @@ function init(){
 function refreshDemo(){ demo = Object.values(months).every(a=>!a || !a.length); }
 const data = () => demo ? exampleData() : months;
 
+
+/* ---------- anàlisi ---------- */
+const STOP = new Set(["de","del","dels","la","el","els","les","l","d","a","al","als","i","y","en","per","amb","con","un","una","compra","compres","pagament","pago","factura","rebut","recibo","mes","setmana"]);
+function normConcept(s){
+  return (s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9 ]+/g," ")
+    .split(/\s+/).filter(w=>w.length>1 && !STOP.has(w) && !/^\d+$/.test(w)).join(" ");
+}
+const MON = ["gener","febrer","març","abril","maig","juny","juliol","agost","setembre","octubre","novembre","desembre"];
+const monName = d => MON[d.getMonth()];
+const deMes = d => (/^[aeiou]/.test(MON[d.getMonth()]) ? "d'" : "de ") + MON[d.getMonth()];
+const pct = (a,b) => b ? Math.round((a-b)/b*100) : 0;
+const eur0 = new Intl.NumberFormat("ca-ES",{style:"currency",currency:"EUR",maximumFractionDigits:0});
+const e0 = n => eur0.format(Math.round(n));
+const sumA = arr => arr.reduce((s,x)=>s+x.a,0);
+
+function analyse(D, curDate){
+  const key = keyOf(curDate), items = D[key]||[];
+  const days = new Date(curDate.getFullYear(), curDate.getMonth()+1, 0).getDate();
+  const isCur = curDate.getFullYear()===today.getFullYear() && curDate.getMonth()===today.getMonth() && today.getDate() < new Date(curDate.getFullYear(), curDate.getMonth()+1, 0).getDate();
+  const isFuture = curDate > today;
+  const elapsed = isCur ? today.getDate() : days, frac = elapsed/days;
+
+  // historial: fins a 6 mesos anteriors amb dades
+  const hist = [];
+  for(let k=1;k<=6;k++){ const d = new Date(curDate.getFullYear(), curDate.getMonth()-k, 1), it = D[keyOf(d)]; if(it && it.length) hist.push({d, items:it}); }
+  const H = hist.length;
+
+  const out = items.filter(x=>x.t==="out"), inc = items.filter(x=>x.t==="in");
+  const O = sumA(out), I = sumA(inc), fixO = sumA(out.filter(x=>x.fix)), varO = O - fixO;
+  const hO = hist.map(h=>sumA(h.items.filter(x=>x.t==="out"))), hI = hist.map(h=>sumA(h.items.filter(x=>x.t==="in")));
+  const avgO = H ? hO.reduce((a,b)=>a+b,0)/H : 0, avgI = H ? hI.reduce((a,b)=>a+b,0)/H : 0;
+  const hRates = hist.map((h,i)=>hI[i]>0 ? (hI[i]-hO[i])/hI[i] : null).filter(v=>v!==null);
+  const avgRate = hRates.length ? hRates.reduce((a,b)=>a+b,0)/hRates.length : null;
+
+  // mitjana per categoria
+  const catAvg = {};
+  hist.forEach(h=>h.items.filter(x=>x.t==="out").forEach(x=>catAvg[x.c]=(catAvg[x.c]||0)+x.a/H));
+  const catCur = {}; out.forEach(x=>catCur[x.c]=(catCur[x.c]||0)+x.a);
+
+  // fixos del mes anterior que falten
+  const prev = D[keyOf(new Date(curDate.getFullYear(), curDate.getMonth()-1, 1))]||[];
+  const missing = prev.filter(p=>p.fix && !items.some(x=>x.fix && x.c===p.c && x.d===p.d && x.t===p.t));
+  const missingOut = sumA(missing.filter(x=>x.t==="out"));
+
+  // agrupació de conceptes (tots els mesos analitzats)
+  const pool = [{d:curDate, items, cur:true}].concat(hist);
+  const allKeys = new Set();
+  pool.forEach(m=>m.items.forEach(x=>{ x._n = normConcept(x.d); if(x._n) allKeys.add(x._n); }));
+  const canon = [], mapK = new Map();
+  [...allKeys].sort((a,b)=>a.split(" ").length-b.split(" ").length || a.length-b.length).forEach(k=>{
+    const tk = k.split(" ");
+    const hit = canon.find(c=>c.tokens.every(t=>tk.includes(t)));
+    if(hit) mapK.set(k, hit.key); else { canon.push({key:k, tokens:tk}); mapK.set(k,k); }
+  });
+  const groups = new Map();
+  pool.forEach((m,mi)=>m.items.forEach(x=>{
+    const gid = x.t + "|" + (x._n ? mapK.get(x._n) : "#"+x.c);
+    let g = groups.get(gid);
+    if(!g){ g = {id:gid, t:x.t, named:!!x._n, labels:{}, cats:{}, months:{}, cur:{n:0,a:0}, fix:false}; groups.set(gid,g); }
+    const lab = x.d ? x.d.trim() : x.c + " (sense concepte)";
+    g.labels[lab] = (g.labels[lab]||0)+1; g.cats[x.c] = (g.cats[x.c]||0)+1;
+    g.months[mi] = (g.months[mi]||0) + x.a;
+    if(m.cur){ g.cur.n++; g.cur.a += x.a; if(x.fix) g.fix = true; }
+  }));
+  const top = o => Object.entries(o).sort((a,b)=>b[1]-a[1])[0][0];
+  groups.forEach(g=>{
+    g.label = top(g.labels); g.label = g.label.charAt(0).toUpperCase()+g.label.slice(1);
+    g.cat = top(g.cats);
+    const hs = Object.entries(g.months).filter(([mi])=>+mi>0).map(([,v])=>v);
+    g.histMonths = hs.length; g.avg = H ? hs.reduce((a,b)=>a+b,0)/H : 0;
+  });
+  const curGroups = [...groups.values()].filter(g=>g.cur.n>0);
+
+  const ins = [];
+  const add = (tone, w, t, x) => ins.push({tone, w, t, x});
+
+  // 1. falten fixos
+  if(missing.length && !isFuture){
+    const names = missing.slice(0,4).map(x=>x.d||x.c).join(", ") + (missing.length>4?"…":"");
+    add("warn", 90, `Falten ${missing.length} ${missing.length===1?"moviment fix":"moviments fixos"} per anotar`, `${names}. Pots copiar-los amb el botó de sota la llista.`);
+  }
+
+  // 2. despesa total vs mitjana / previsió
+  let head = "";
+  if(!items.length){
+    head = isFuture ? `Encara no has arribat a ${monName(curDate)}.` : `No hi ha cap moviment ${deMes(curDate)}.`;
+  } else if(isCur){
+    const proj = elapsed >= 7 ? fixO + missingOut + varO/frac : null;
+    head = `Portes <strong>${e0(O)}</strong> gastats en ${elapsed} dies` + (I?` i <strong>${e0(I)}</strong> ingressats`:"") + ".";
+    if(proj!==null && varO>0){
+      head += ` Al ritme actual acabaràs el mes amb unes despeses d'uns <strong>${e0(proj)}</strong>`;
+      if(H) head += ` (la teva mitjana és ${e0(avgO)})`;
+      head += ".";
+      if(H && avgO>0){
+        const p = pct(proj, avgO);
+        if(p >= 15) add("bad", 80, `Vas ${p} % per sobre del teu ritme habitual`, `Si segueixes així, gastaràs uns ${e0(proj-avgO)} més que un mes normal.`);
+        else if(p <= -15) add("good", 60, `Vas ${-p} % per sota del teu ritme habitual`, `Si no canvia res, estalviaràs uns ${e0(avgO-proj)} respecte a un mes normal.`);
+      }
+      const expI = I + sumA(missing.filter(x=>x.t==="in"));
+      if(expI>0){ const b = expI - proj; head += ` El balanç previst és <strong>${signed(Math.round(b))}</strong>.`; }
+    } else if(proj===null && H){
+      head += ` Encara és aviat per fer previsions; la teva mitjana mensual de despesa és ${e0(avgO)}.`;
+    }
+  } else {
+    const b = I - O;
+    head = `Has tancat ${monName(curDate)} amb un balanç de <strong>${signed(b)}</strong>`;
+    head += I>0 ? (b>=0 ? `, estalviant el ${Math.round(b/I*100)} % del que has ingressat.` : `: has gastat ${e0(-b)} més del que has ingressat.`) : ".";
+    if(H && avgO>0){
+      const p = pct(O, avgO);
+      if(Math.abs(p) >= 5) head += ` Has gastat un ${Math.abs(p)} % ${p>0?"més":"menys"} que la teva mitjana (${e0(avgO)}).`;
+      else head += ` Una despesa molt semblant a la teva mitjana (${e0(avgO)}).`;
+    }
+    if(avgRate!==null && I>0 && b>=0){
+      const r = b/I, d = Math.round((r-avgRate)*100);
+      if(d >= 10) add("good", 55, `Has estalviat més que de costum`, `El ${Math.round(r*100)} % dels ingressos, quan normalment és el ${Math.round(avgRate*100)} %.`);
+      else if(d <= -10) add("warn", 55, `Has estalviat menys que de costum`, `El ${Math.round(r*100)} % dels ingressos, quan normalment és el ${Math.round(avgRate*100)} %.`);
+    }
+    if(I>0 && b<0) add("bad", 85, "Mes en negatiu", `Les despeses han superat els ingressos en ${e0(-b)}.`);
+  }
+  if(!H && items.length) add("info", 5, "Encara no hi ha historial", "Quan tinguis algun mes més registrat, compararé cada categoria i concepte amb la teva mitjana.");
+
+  // 3. categories vs mitjana
+  if(H){
+    const rows = Object.keys(Object.assign({}, catCur, catAvg)).map(c=>({c, v:catCur[c]||0, av:catAvg[c]||0}));
+    if(isCur){
+      rows.filter(r=>r.av>0 && r.v > r.av*1.1 && r.v-r.av >= 15).sort((a,b)=>(b.v-b.av)-(a.v-a.av)).slice(0,2).forEach(r=>
+        add("warn", 70, `${r.c}: ja has superat la mitjana del mes`, `Portes ${e0(r.v)} i normalment hi gastes ${e0(r.av)} en tot el mes.`));
+    } else {
+      rows.filter(r=>r.av>0 && r.v-r.av >= 15 && r.v >= r.av*1.25).sort((a,b)=>(b.v-b.av)-(a.v-a.av)).slice(0,2).forEach(r=>
+        add("warn", 65, `${r.c}: +${pct(r.v,r.av)} % respecte a la mitjana`, `${e0(r.v)} aquest mes, quan normalment són ${e0(r.av)}.`));
+      rows.filter(r=>r.av>=15 && r.av-r.v >= 15 && r.v <= r.av*0.75).sort((a,b)=>(b.av-b.v)-(a.av-a.v)).slice(0,1).forEach(r=>
+        add("good", 45, `${r.c}: ${pct(r.v,r.av)} % respecte a la mitjana`, `${e0(r.v)} aquest mes, quan normalment són ${e0(r.av)}. Has estalviat ${e0(r.av-r.v)} aquí.`));
+    }
+    const fresh = rows.filter(r=>!r.av && r.v >= 20).sort((a,b)=>b.v-a.v)[0];
+    if(fresh && H>=2) add("info", 30, `Categoria nova: ${fresh.c}`, `${e0(fresh.v)} en una categoria on els últims mesos no havies gastat res.`);
+  }
+
+  // 4. conceptes
+  const outG = curGroups.filter(g=>g.t==="out");
+  const freq = outG.filter(g=>g.named && g.cur.n>=3).sort((a,b)=>b.cur.n-a.cur.n || b.cur.a-a.cur.a)[0];
+  if(freq){
+    let x = `${freq.cur.n} vegades, ${e0(freq.cur.a)} en total (${eur.format(freq.cur.a/freq.cur.n)} de mitjana cada cop).`;
+    if(H && freq.avg>0) x += ` Un mes normal hi gastes ${e0(freq.avg)}.`;
+    add("info", 40, `El que més repeteixes: ${freq.label}`, x);
+  }
+  if(H){
+    const up = outG.filter(g=>g.named && g.avg>0 && g.cur.a-g.avg >= 20 && g.cur.a >= g.avg*1.4 && (!isCur || g.cur.a > g.avg))
+      .sort((a,b)=>(b.cur.a-b.avg)-(a.cur.a-a.avg))[0];
+    if(up) add("warn", 50, `${up.label}: ${e0(up.cur.a)} aquest mes`, `Són ${e0(up.cur.a-up.avg)} més que la teva mitjana en aquest concepte (${e0(up.avg)}).`);
+    if(H>=2){
+      const nw = outG.filter(g=>g.named && !g.histMonths && g.cur.a >= 25 && catAvg[g.cat]).sort((a,b)=>b.cur.a-a.cur.a).slice(0,2);
+      if(nw.length) add("info", 25, nw.length===1?"Despesa nova":"Despeses noves", nw.map(g=>`${g.label} (${e0(g.cur.a)})`).join(" i ") + ": no hi apareixien els últims mesos.");
+    }
+  }
+  // sembla fix però no està marcat
+  const rec = [...groups.values()].filter(g=>{
+    if(g.t!=="out" || !g.named || g.fix) return false;
+    const vals = Object.values(g.months); if(vals.length < 3 || !g.months[0]) return false;
+    const s = vals.slice().sort((a,b)=>a-b), med = s[Math.floor(s.length/2)];
+    return med >= 3 && vals.every(v=>Math.abs(v-med) <= med*0.05);
+  }).sort((a,b)=>b.cur.a-a.cur.a).slice(0,2);
+  if(!isFuture) rec.forEach(rec=>add("info", 35, `${rec.label} sembla una despesa fixa`, `Apareix ${Object.keys(rec.months).length} mesos seguits amb un import semblant (~${eur.format(rec.cur.a)}). Si la marques com a fixa, la podràs copiar d'un sol clic cada mes.`));
+
+  // 5. despeses petites
+  const small = out.filter(x=>!x.fix && x.a < 10);
+  if(small.length >= 4 && varO>0){
+    const sa = sumA(small);
+    add(sa/varO >= 0.2 ? "warn" : "info", 30, `${small.length} despeses petites sumen ${e0(sa)}`, `Són moviments de menys de 10 € i fan el ${Math.round(sa/varO*100)} % de la teva despesa variable.`);
+  }
+  // 6. despesa més gran
+  const big = out.filter(x=>!x.fix).sort((a,b)=>b.a-a.a)[0];
+  if(big && O>0 && big.a/O >= 0.25 && out.length>=3) add("info", 28, `La despesa més gran: ${big.d||big.c}`, `${eur.format(big.a)} el dia ${big.day}, el ${Math.round(big.a/O*100)} % de tot el que has gastat.`);
+  // 7. fixos vs ingressos
+  if(I>0 && fixO>0){
+    const r = fixO/I;
+    if(r >= 0.5) add("warn", 45, `Les despeses fixes s'emporten el ${Math.round(r*100)} % dels ingressos`, `${e0(fixO)} fixos sobre ${e0(I)} ingressats. Et queda poc marge per a imprevistos.`);
+    else add("info", 12, `Fixos: ${Math.round(r*100)} % dels ingressos`, `${e0(fixO)} en despeses fixes. La resta, ${e0(I-fixO)}, és el teu marge per a la despesa variable i l'estalvi.`);
+  }
+  // 8. cap de setmana
+  const varItems = out.filter(x=>!x.fix);
+  if(varItems.length >= 6 && varO>0){
+    const we = sumA(varItems.filter(x=>{ const w = new Date(curDate.getFullYear(), curDate.getMonth(), x.day).getDay(); return w===0||w===6||w===5; }));
+    const share = we/varO;
+    if(share >= 0.55) add("info", 20, `El ${Math.round(share*100)} % de la despesa variable va de divendres a diumenge`, `${e0(we)} dels ${e0(varO)} variables. Si vols retallar, és on més marge tens.`);
+  }
+  // 9. ingressos
+  if(H && avgI>0 && !isCur && Math.abs(pct(I,avgI)) >= 20)
+    add(I>avgI?"good":"warn", 40, `Ingressos ${I>avgI?"per sobre":"per sota"} del normal`, `${e0(I)} aquest mes davant d'una mitjana de ${e0(avgI)}.`);
+
+  const order = {bad:0, warn:1, good:2, info:3};
+  ins.sort((a,b)=>b.w-a.w || order[a.tone]-order[b.tone]);
+  return {H, head, ins, catAvg, groups:curGroups.sort((a,b)=>b.cur.a-a.cur.a), histLabel: H ? `últims ${H} ${H===1?"mes":"mesos"}` : ""};
+}
+
+function renderAnalysis(A){
+  $("anHead").innerHTML = A.head;
+  const li = i=>`<li class="${i.tone}"><div><span class="t">${esc(i.t)}</span><span class="x">${esc(i.x)}</span></div></li>`;
+  $("insights").innerHTML = A.ins.slice(0,3).map(li).join("");
+  $("insights").hidden = !A.ins.length;
+  const rest = A.ins.slice(3);
+  $("insights2").innerHTML = rest.map(li).join("");
+  $("insights2").hidden = !rest.length;
+  $("anSum").textContent = rest.length ? `${rest.length} ${rest.length===1?"observació més":"observacions més"} i detall per conceptes` : "Detall per conceptes";
+  const rows = A.groups;
+  $("anMore").hidden = !rows.length;
+  $("conceptRows").innerHTML = rows.map(g=>{
+    const sign = g.t==="in" ? "+" : "−";
+    let avg = "—";
+    if(A.H && g.avg>0){ const p = pct(g.cur.a, g.avg); avg = `${e0(g.avg)}<div class="sub2">${p>0?"+":""}${p} %</div>`; }
+    else if(A.H) avg = `<span class="sub2">nou</span>`;
+    return `<tr><td>${esc(g.label)}<div class="sub2">${esc(g.cat)}${g.fix?" · fix":""}</div></td><td class="r">${g.cur.n}</td><td class="r ${g.t==="in"?"pos":"neg"}">${sign}${eur.format(g.cur.a)}</td><td class="r">${avg}</td></tr>`;
+  }).join("");
+}
+
 /* ---------- render ---------- */
 function totals(items){
   let i=0,o=0; for(const x of items||[]) x.t==="in" ? i+=x.a : o+=x.a;
@@ -278,13 +533,19 @@ function render(){
   $("sOutN").textContent = nOut + (nOut===1?" moviment":" moviments");
   $("sRate").textContent = t.i>0 ? "Estalvies el " + Math.round(t.b/t.i*100) + " % del que ingresses" : (items.length? "Aquest mes no hi ha ingressos" : "Encara no hi ha res aquest mes");
 
+  // anàlisi
+  const A = analyse(D, cur);
+  renderAnalysis(A);
+
   // categories
   const byCat = {}; items.filter(x=>x.t==="out").forEach(x=>byCat[x.c]=(byCat[x.c]||0)+x.a);
   const cats = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
-  const max = cats.length ? cats[0][1] : 1;
-  $("cats").innerHTML = cats.length ? cats.map(([c,v])=>
-    `<div class="cat"><span>${esc(c)}</span><span class="num">${eur.format(v)} <span class="hint">${Math.round(v/t.o*100)} %</span></span><div class="bar"><i style="width:${(v/max*100).toFixed(1)}%"></i></div></div>`
-  ).join("") : `<p class="empty" style="margin:0">Cap despesa aquest mes.</p>`;
+  const max = Math.max(1, ...cats.map(([c,v])=>Math.max(v, A.catAvg[c]||0)));
+  $("catHint").hidden = !A.H || !cats.length;
+  $("cats").innerHTML = cats.length ? cats.map(([c,v])=>{
+    const av = A.catAvg[c]||0;
+    return `<div class="cat"><span>${esc(c)}</span><span class="num">${eur.format(v)} <span class="hint">${Math.round(v/t.o*100)} %</span></span><div class="bar"><i style="width:${(v/max*100).toFixed(1)}%"></i>${A.H&&av?`<span class="avg" style="left:calc(${(av/max*100).toFixed(1)}% - 1px)" title="Mitjana: ${eur.format(av)}"></span>`:""}</div></div>`;
+  }).join("") : `<p class="empty" style="margin:0">Cap despesa aquest mes.</p>`;
 
   // list
   const shown = items.filter(x=>filter==="all"||x.t===filter);
